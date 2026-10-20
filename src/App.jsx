@@ -47,11 +47,21 @@ export default function App() {
     if (phase !== 'universe') return;
 
     const handleKey = (e) => {
-      // Backtick opens terminal
-      if (e.key === '`' && !terminalOpen) {
+      // If typing in input, textarea, or select, ignore global navigation shortcuts
+      const isInputFocused = e.target && e.target.tagName && e.target.tagName.match(/input|textarea|select/i);
+      if (isInputFocused) {
+        if (e.key === 'Escape') {
+          e.target.blur();
+        }
+        return;
+      }
+
+      // Backtick or 'T' toggles terminal
+      if ((e.key === '`' || e.key === 't' || e.key === 'T') && !terminalOpen) {
         setTerminalOpen(true);
         return;
       }
+
       // Escape closes panels
       if (e.key === 'Escape') {
         if (terminalOpen) {
@@ -67,11 +77,31 @@ export default function App() {
           return;
         }
       }
-      // R resets camera
-      if (e.key === 'r' || e.key === 'R') {
-        if (!e.target.tagName.match(/input|textarea/i)) {
-          setSelectedId(null);
+
+      // 'M' toggles recruiter mode
+      if (e.key === 'm' || e.key === 'M') {
+        setRecruiterMode(prev => !prev);
+        return;
+      }
+
+      // Arrow keys cycle through planets
+      if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !terminalOpen && !recruiterMode) {
+        e.preventDefault();
+        const ids = ['about', 'tripnexus', 'enterskill', 'skills', 'experience', 'contact'];
+        const currIdx = selectedId ? ids.indexOf(selectedId) : -1;
+        if (e.key === 'ArrowRight') {
+          const nextIdx = (currIdx + 1) % ids.length;
+          setSelectedId(ids[nextIdx]);
+        } else {
+          const prevIdx = currIdx <= 0 ? ids.length - 1 : currIdx - 1;
+          setSelectedId(ids[prevIdx]);
         }
+        return;
+      }
+
+      // R or Home resets camera / universe view
+      if (e.key === 'r' || e.key === 'R' || e.key === 'Home') {
+        setSelectedId(null);
       }
     };
 

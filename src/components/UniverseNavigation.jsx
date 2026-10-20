@@ -130,27 +130,60 @@ export default function UniverseNavigation({
         </nav>
       )}
 
-      {/* Selected destination breadcrumb */}
+      {/* Selected destination breadcrumb with quick world cycling */}
       {selectedId && (
         <div style={styles.breadcrumb} aria-current="page" aria-label={`Currently viewing: ${selected?.label}`}>
           <button
             style={styles.breadcrumbBack}
             onClick={() => onSelect(null)}
-            aria-label="Return to universe"
+            aria-label="Return to universe overview"
+            title="Return to universe overview (or press Esc / R)"
           >
             ← UNIVERSE
           </button>
           <span style={styles.breadcrumbSep} aria-hidden="true">›</span>
-          <span style={{color: selected?.color || '#00F5FF'}}>{selected?.label}</span>
+          <span style={{ color: selected?.color || '#00F5FF', fontWeight: 700 }}>{selected?.label}</span>
+
+          <div style={styles.cycleGroup}>
+            <button
+              onClick={() => {
+                const ids = DESTINATIONS.map(d => d.id);
+                const idx = ids.indexOf(selectedId);
+                const prev = ids[(idx - 1 + ids.length) % ids.length];
+                onSelect(prev);
+              }}
+              style={styles.cycleBtn}
+              title="Previous world (Left Arrow)"
+              aria-label="Navigate to previous world"
+            >
+              ◀
+            </button>
+            <button
+              onClick={() => {
+                const ids = DESTINATIONS.map(d => d.id);
+                const idx = ids.indexOf(selectedId);
+                const next = ids[(idx + 1) % ids.length];
+                onSelect(next);
+              }}
+              style={styles.cycleBtn}
+              title="Next world (Right Arrow)"
+              aria-label="Navigate to next world"
+            >
+              ▶
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Keyboard shortcut hint */}
-      <div style={styles.shortcuts} aria-hidden="true">
-        <span>` terminal</span>
-        <span>ESC close</span>
-        <span>R reset</span>
-      </div>
+      {/* Keyboard shortcut hint (hidden when a panel is open) */}
+      {!selectedId && (
+        <div style={styles.shortcuts} aria-hidden="true">
+          <span>` terminal</span>
+          <span>←/→ cycle</span>
+          <span>M recruiter</span>
+          <span>R reset</span>
+        </div>
+      )}
     </>
   );
 }
@@ -398,6 +431,23 @@ const styles = {
   },
   breadcrumbSep: {
     color: 'rgba(146,155,179,0.3)',
+  },
+  cycleGroup: {
+    display: 'flex',
+    gap: '4px',
+    marginLeft: '6px',
+  },
+  cycleBtn: {
+    background: 'transparent',
+    border: '1px solid rgba(0,245,255,0.2)',
+    borderRadius: '6px',
+    color: '#929BB3',
+    cursor: 'pointer',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    padding: '2px 7px',
+    lineHeight: 1.6,
+    transition: 'all 0.2s ease',
   },
   shortcuts: {
     position: 'fixed',

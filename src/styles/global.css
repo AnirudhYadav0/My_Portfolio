@@ -260,11 +260,40 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* --- Responsive ------------------------------------------- */
+/* --- Responsive & Mobile Touch ---------------------------- */
 @media (max-width: 768px) {
   body {
     overflow: hidden;
   }
+
+  /* Ensure touch targets meet minimum 44px standards on touch */
+  button, a {
+    min-height: 38px;
+  }
+}
+
+/* Accessible visible focus outlines */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--electric-cyan) !important;
+  outline-offset: 2px !important;
+}
+
+/* Touch action optimization for 3D canvas */
+canvas {
+  touch-action: none;
+}
+
+/* Custom scrollbars inside HUD and modals */
+.custom-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 245, 255, 0.3);
+  border-radius: 4px;
 }
 
 /* --- HUD Corner decorations -------------------------------- */

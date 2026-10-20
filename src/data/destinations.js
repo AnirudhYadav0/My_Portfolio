@@ -1,0 +1,66 @@
+// ============================================================
+// UNIVERSE DESTINATIONS — Navigation nodes for the 3D scene
+// ============================================================
+
+export const DESTINATIONS = [
+  {
+    id: 'about',
+    label: 'CORE',
+    sublabel: 'About Me',
+    position: [0, 0, 0],
+    size: 1.1,
+    color: '#00F5FF',
+    emissive: '#004060',
+    type: 'core',
+  },
+  {
+    id: 'tripnexus',
+    label: 'TRIPNEXUS',
+    sublabel: 'Travel AI',
+    position: [5, 0.5, -1.5],
+    size: 0.8,
+    color: '#8B5CFF',
+    emissive: '#2A1060',
+    type: 'travel',
+  },
+  {
+    id: 'enterskill',
+    label: 'ENTERSKILL',
+    sublabel: 'Full-Stack App',
+    position: [-5, -0.5, -1],
+    size: 0.75,
+    color: '#71FF9C',
+    emissive: '#104030',
+    type: 'saas',
+  },
+  {
+    id: 'skills',
+    label: 'SKILLS',
+    sublabel: 'Constellation',
+    position: [2.5, 3, -2.5],
+    size: 0.6,
+    color: '#FF35D3',
+    emissive: '#401040',
+    type: 'skill',
+  },
+  {
+    id: 'experience',
+    label: 'EXPERIENCE',
+    sublabel: 'Nebula',
+    position: [-2.5, -3, -2],
+    size: 0.65,
+    color: '#FFB347',
+    emissive: '#403010',
+    type: 'nebula',
+  },
+  {
+    id: 'contact',
+    label: 'CONTACT',
+    sublabel: 'Portal',
+    position: [0, -3.5, -0.5],
+    size: 0.55,
+    color: '#00F5FF',
+    emissive: '#003040',
+    type: 'portal',
+  },
+];

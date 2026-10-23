@@ -2,6 +2,10 @@
 
 > "Don't Browse My Portfolio. Explore My Universe."
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-neonverse--portfolio.onrender.com-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://neonverse-portfolio.onrender.com)
+
+🌐 **Live URL:** [https://neonverse-portfolio.onrender.com](https://neonverse-portfolio.onrender.com)
+
 An immersive 3D interactive developer portfolio built with React, Vite, and Three.js. Visitors explore a futuristic digital universe to discover projects, skills, experience, and contact information.
 
 ---
@@ -101,13 +105,22 @@ The build outputs to `dist/`. Code is split into chunks for Three.js, React Thre
 
 ---
 
-## Deployment (Vercel)
+## Deployment
 
+### Render (Active Live Deployment)
+The project is configured for continuous deployment on [Render](https://render.com) using [`render.yaml`](./render.yaml).
+
+- **Live URL:** [https://neonverse-portfolio.onrender.com](https://neonverse-portfolio.onrender.com)
+- **Runtime:** Static Site
+- **Build Command:** `npm install && npm run build`
+- **Publish Directory:** `./dist`
+- **SPA Rewrites:** `/*` → `/index.html`
+
+### Vercel
 1. Push the repository to GitHub.
 2. Import the project on [vercel.com](https://vercel.com).
 3. Vercel auto-detects Vite — no configuration needed.
-4. Set any environment variables (none required currently).
-5. Click **Deploy**.
+4. Click **Deploy**.
 
 The `dist/` directory is automatically deployed.
 

@@ -1,0 +1,71 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 2868 >>
+stream
+BT /F2 20 Tf 50 750 Td (ANIRUDH YADAV) Tj ET
+BT /F1 11 Tf 50 734 Td (Full-Stack Developer | Digital Builder) Tj ET
+BT /F1 9 Tf 50 720 Td (Email: yadavanirudh1826@gmail.com  |  GitHub: github.com/AnirudhYadav0  |  Portfolio: NEONVERSE) Tj ET
+0.7 0.7 0.7 RG 1 w 50 710 m 545 710 l S
+BT /F2 12 Tf 50 690 Td (EDUCATION) Tj ET
+BT /F2 10 Tf 50 672 Td (Bachelor of Computer Applications \(BCA\) - Final Year) Tj ET
+BT /F1 9.5 Tf 50 658 Td (SRMU, Lucknow  |  Focus: Full-Stack Web Development, Data Structures, DBMS) Tj ET
+BT /F2 12 Tf 50 630 Td (TECHNICAL SKILLS) Tj ET
+BT /F2 9.5 Tf 50 612 Td (Frontend:) Tj ET
+BT /F1 9.5 Tf 115 612 Td (React.js, JavaScript \(ES6+\), HTML5, CSS3, Responsive Design, Three.js) Tj ET
+BT /F2 9.5 Tf 50 596 Td (Backend:) Tj ET
+BT /F1 9.5 Tf 115 596 Td (Node.js, Express.js, RESTful API Design, JWT Authentication) Tj ET
+BT /F2 9.5 Tf 50 580 Td (Database:) Tj ET
+BT /F1 9.5 Tf 115 580 Td (MongoDB, MongoDB Atlas, Mongoose ODM) Tj ET
+BT /F2 9.5 Tf 50 564 Td (Tools & Cloud:) Tj ET
+BT /F1 9.5 Tf 115 564 Td (Git, GitHub, Vite, Axios, Vercel, Render) Tj ET
+BT /F2 12 Tf 50 536 Td (FEATURED PROJECTS) Tj ET
+BT /F2 10.5 Tf 50 516 Td (EnterSkill Hub -- Full-Stack Web Application) Tj ET
+BT /F1 9 Tf 50 502 Td (Stack: React.js, Vite, Node.js, Express.js, MongoDB Atlas, JWT, Axios) Tj ET
+BT /F1 9 Tf 60 488 Td (- Built full-stack web app featuring JWT auth, personalized dashboard, and CRUD operations.) Tj ET
+BT /F1 9 Tf 60 474 Td (- Integrated secure token-based authorization and modular RESTful API architecture.) Tj ET
+BT /F1 9 Tf 60 460 Td (- Live deployment on Vercel with responsive, modern user experience.) Tj ET
+BT /F2 10.5 Tf 50 436 Td (TripNexus -- AI-Powered Travel Planning Application) Tj ET
+BT /F1 9 Tf 50 422 Td (Stack: React.js, Vite, Node.js, REST APIs, CSS3) Tj ET
+BT /F1 9 Tf 60 408 Td (- Developed interactive travel planning app generating tailored itineraries from user preferences.) Tj ET
+BT /F1 9 Tf 60 394 Td (- Includes budget estimation, duration customization, and dynamic travel style recommendations.) Tj ET
+BT /F1 9 Tf 60 380 Td (- Interactive cyber UI with responsive layout across mobile and desktop viewports.) Tj ET
+BT /F2 12 Tf 50 350 Td (EXPERIENCE & CERTIFICATIONS) Tj ET
+BT /F2 10 Tf 50 332 Td (Full-Stack Web Development Intern) Tj ET
+BT /F1 9 Tf 50 318 Td (- Developed responsive web components, API integrations, and client state management.) Tj ET
+BT /F1 9 Tf 50 302 Td (- Practical training in modern JavaScript ecosystem and collaborative Git workflows.) Tj ET
+BT /F2 10 Tf 50 276 Td (Certifications:) Tj ET
+BT /F1 9 Tf 50 260 Td (- Python Programming Certification) Tj ET
+BT /F1 9 Tf 50 246 Td (- Gemini AI Certification) Tj ET
+BT /F1 9 Tf 50 232 Td (- Full-Stack Web Development Certificate) Tj ET
+BT /F1 8 Tf 50 70 Td (Generated from NEONVERSE Portfolio -- Anirudh Yadav -- All rights reserved.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000003171 00000 n 
+0000003241 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+3316
+%%EOF

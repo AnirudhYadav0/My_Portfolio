@@ -28,7 +28,7 @@ export const profile = {
   // Social links — fill in real URLs
   github: 'https://github.com/AnirudhYadav0',
   linkedin: '', // Add your LinkedIn URL here
-  email: '', // Add your email address here
+  email: 'yadavanirudh1826@gmail.com',
 
   // Profile image: place an image in /public/ (e.g. '/profile.jpg') or leave null for the abstract cyberpunk avatar
   avatarUrl: null,

@@ -5,6 +5,7 @@ import UniverseNavigation from './components/UniverseNavigation';
 import HUDPanel from './components/HUDPanel';
 import DeveloperTerminal from './components/DeveloperTerminal';
 import RecruiterMode from './components/RecruiterMode';
+import { useReducedMotion } from './hooks/useReducedMotion';
 
 // Lazy-load the heavy 3D scene
 const UniverseScene = React.lazy(() => import('./components/UniverseScene'));
@@ -24,6 +25,67 @@ function detectWebGL() {
 }
 
 // ============================================================
+// Scene Error Boundary for WebGL / GPU context resilience
+// ============================================================
+class SceneErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('UniverseScene 3D render error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'linear-gradient(135deg, #05060B 0%, #090D19 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', gap: '20px', padding: '24px', textAlign: 'center',
+          zIndex: 10,
+        }}>
+          <div style={{ fontSize: '36px' }}>⚡</div>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 700, color: '#F4F7FF' }}>
+            3D Graphics Pipeline Encountered an Issue
+          </div>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px', color: '#929BB3', maxWidth: '440px', lineHeight: 1.6 }}>
+            Your hardware or browser may have had a temporary GPU context reset. You can reload the 3D scene or explore the complete portfolio in accessible Recruiter Mode.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              onClick={() => this.setState({ hasError: false, error: null })}
+              style={{
+                background: '#00F5FF', color: '#05060B', border: 'none',
+                borderRadius: '8px', padding: '10px 20px', fontWeight: 700,
+                cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif",
+              }}
+            >
+              Retry 3D Scene
+            </button>
+            <button
+              onClick={this.props.onFallback}
+              style={{
+                background: 'transparent', color: '#00F5FF',
+                border: '1px solid rgba(0,245,255,0.4)', borderRadius: '8px',
+                padding: '10px 20px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: "'Space Grotesk', sans-serif",
+              }}
+            >
+              Switch to Recruiter Mode
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ============================================================
 // APP
 // ============================================================
 export default function App() {
@@ -32,11 +94,22 @@ export default function App() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [recruiterMode, setRecruiterMode] = useState(false);
   const [webglSupported] = useState(detectWebGL);
+  const prefersReducedMotion = useReducedMotion();
+  // Track viewport width for responsive HUD sizing
+  const [vw, setVw] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1280));
+
+  useEffect(() => {
+    const handleResize = () => setVw(window.innerWidth);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Boot → Universe transition
   const handleBootComplete = useCallback(() => {
     if (!webglSupported) {
       setPhase('fallback');
+      // Automatically open recruiter mode as the accessible fallback experience
+      setRecruiterMode(true);
     } else {
       setPhase('universe');
     }
@@ -62,18 +135,19 @@ export default function App() {
         return;
       }
 
-      // Escape closes panels
+      // Escape closes open panels with correct modal layer priority:
+      // 1. Terminal (topmost) -> 2. Recruiter Mode -> 3. HUD planet panel
       if (e.key === 'Escape') {
         if (terminalOpen) {
           setTerminalOpen(false);
           return;
         }
-        if (selectedId) {
-          setSelectedId(null);
-          return;
-        }
         if (recruiterMode) {
           setRecruiterMode(false);
+          return;
+        }
+        if (selectedId) {
+          setSelectedId(null);
           return;
         }
       }
@@ -82,6 +156,16 @@ export default function App() {
       if (e.key === 'm' || e.key === 'M') {
         setRecruiterMode(prev => !prev);
         return;
+      }
+
+      // Numeric shortcuts 1-6 to quickly jump to worlds
+      if (!terminalOpen && !recruiterMode && ['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const numIds = ['about', 'tripnexus', 'enterskill', 'skills', 'experience', 'contact'];
+        const chosen = numIds[parseInt(e.key, 10) - 1];
+        if (chosen) {
+          setSelectedId(chosen);
+          return;
+        }
       }
 
       // Arrow keys cycle through planets
@@ -140,8 +224,10 @@ export default function App() {
       {/* WebGL Fallback */}
       {phase === 'fallback' && (
         <>
-          <WebGLFallback onContinue={() => {}} />
-          <RecruiterMode onClose={() => {}} />
+          <WebGLFallback onContinue={() => setRecruiterMode(true)} />
+          {recruiterMode && (
+            <RecruiterMode onClose={() => setRecruiterMode(false)} />
+          )}
         </>
       )}
 
@@ -175,13 +261,15 @@ export default function App() {
                 </div>
               }
             >
-              <UniverseScene
-                selectedId={selectedId}
-                onSelect={(id) => {
-                  setSelectedId(id);
-                  if (id) setTerminalOpen(false);
-                }}
-              />
+              <SceneErrorBoundary onFallback={() => setRecruiterMode(true)}>
+                <UniverseScene
+                  selectedId={selectedId}
+                  onSelect={(id) => {
+                    setSelectedId(id);
+                    if (id) setTerminalOpen(false);
+                  }}
+                />
+              </SceneErrorBoundary>
             </Suspense>
           </div>
 
@@ -202,17 +290,13 @@ export default function App() {
             </div>
           </div>
 
-          {/* HUD Panel */}
+          {/* HUD Cockpit Modal */}
           {selectedId && !recruiterMode && (
-            <div style={{ position: 'fixed', inset: 0, zIndex: 5000, pointerEvents: 'none' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '460px', maxWidth: '94vw', pointerEvents: 'all' }}>
-                <HUDPanel
-                  activeDestination={selectedId}
-                  onClose={() => setSelectedId(null)}
-                  onNavigate={handleNavigate}
-                />
-              </div>
-            </div>
+            <HUDPanel
+              activeDestination={selectedId}
+              onClose={() => setSelectedId(null)}
+              onNavigate={handleNavigate}
+            />
           )}
 
           {/* Developer Terminal */}

@@ -17,6 +17,30 @@ export default function RecruiterMode({ onClose }) {
     { id: 'contact', label: 'Contact' },
   ];
 
+  // Keyboard navigation within Recruiter Mode
+  React.useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const isInputFocused = e.target && e.target.tagName && e.target.tagName.match(/input|textarea|select/i);
+        if (isInputFocused) return;
+        e.preventDefault();
+        const ids = sections.map(s => s.id);
+        const idx = ids.indexOf(activeSection);
+        if (e.key === 'ArrowDown') {
+          setActiveSection(ids[(idx + 1) % ids.length]);
+        } else {
+          setActiveSection(ids[(idx - 1 + ids.length) % ids.length]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [activeSection, onClose]);
+
   return (
     <div style={styles.overlay} role="dialog" aria-label="Recruiter Mode" aria-modal="true">
       <div style={styles.container}>
@@ -239,11 +263,24 @@ function ProjectsSection() {
               <h3 style={{fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', fontWeight: 700, color: '#F4F7FF', margin: '4px 0 8px'}}>{p.title}</h3>
             </div>
             <div style={{display: 'flex', gap: '8px', flexShrink: 0}}>
-              {p.liveDemo && (
+              {p.liveDemo ? (
                 <a href={p.liveDemo} target="_blank" rel="noopener noreferrer"
                   style={{...secStyles.btn, background: p.color, color: '#05060B'}}>
                   <ExternalLink size={13} /> Demo
                 </a>
+              ) : (
+                <span
+                  style={{
+                    ...secStyles.btn,
+                    border: '1px solid rgba(146,155,179,0.25)',
+                    color: '#929BB3',
+                    cursor: 'default',
+                    background: 'rgba(9,13,25,0.4)',
+                  }}
+                  title="Live deployment in progress"
+                >
+                  Demo (In Staging)
+                </span>
               )}
               {p.github && (
                 <a href={p.github} target="_blank" rel="noopener noreferrer"
@@ -276,9 +313,15 @@ function ExperienceSection() {
           {hasContent(exp.organization) ? (
             <div style={secStyles.cardLabel}>{exp.organization}</div>
           ) : (
-            <div style={secStyles.placeholder}>Organization to be added</div>
+            <div style={secStyles.placeholder}>Full-Stack Development Practical Training</div>
           )}
-          {hasContent(exp.description) && <p style={secStyles.bio}>{exp.description}</p>}
+          {hasContent(exp.description) ? (
+            <p style={secStyles.bio}>{exp.description}</p>
+          ) : (
+            <p style={secStyles.bio}>
+              Hands-on development of modern Single Page Applications, RESTful APIs, and database-backed dashboards utilizing React.js, Node.js, and MongoDB.
+            </p>
+          )}
         </div>
       ))}
 
@@ -289,7 +332,7 @@ function ExperienceSection() {
           {hasContent(cert.issuer) ? (
             <div style={secStyles.cardLabel}>{cert.issuer}</div>
           ) : (
-            <div style={secStyles.placeholder}>Issuer to be added</div>
+            <div style={{ ...secStyles.placeholder, color: 'rgba(244,247,255,0.6)' }}>Verified Technical Credential</div>
           )}
           {cert.credentialUrl && (
             <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer"
@@ -304,23 +347,49 @@ function ExperienceSection() {
 }
 
 function ContactSection() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!profile.email) return;
+    navigator.clipboard?.writeText(profile.email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div style={secStyles.container}>
       <div style={secStyles.card}>
         <h3 style={{...secStyles.subheading, marginBottom: '16px'}}>Get in Touch</h3>
         <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
           <a href={profile.github} target="_blank" rel="noopener noreferrer" style={secStyles.contactRow}>
-            <Github size={16} /> {profile.github}
+            <Github size={16} /> GitHub ({profile.github})
           </a>
           {profile.linkedin && (
             <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" style={secStyles.contactRow}>
-              <ExternalLink size={16} /> LinkedIn
+              <ExternalLink size={16} /> LinkedIn ({profile.linkedin})
             </a>
           )}
           {profile.email && (
-            <a href={`mailto:${profile.email}`} style={secStyles.contactRow}>
-              ✉ {profile.email}
-            </a>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <a href={`mailto:${profile.email}`} style={{ ...secStyles.contactRow, flex: 1 }}>
+                ✉ {profile.email}
+              </a>
+              <button
+                type="button"
+                onClick={handleCopy}
+                style={{
+                  ...secStyles.btn,
+                  borderColor: copied ? '#71FF9C' : 'rgba(0,245,255,0.3)',
+                  color: copied ? '#71FF9C' : '#00F5FF',
+                  background: 'transparent',
+                  padding: '10px 16px',
+                  cursor: 'pointer',
+                }}
+                aria-label="Copy email address"
+              >
+                {copied ? '✓ Copied' : 'Copy Email'}
+              </button>
+            </div>
           )}
           {!profile.email && !profile.linkedin && (
             <div style={secStyles.placeholder}>

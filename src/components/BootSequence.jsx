@@ -1,116 +1,151 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
-const BOOT_LINES = [
-  { text: '[ NEONVERSE SYSTEM INITIALIZING ]', delay: 0, color: '#00F5FF' },
-  { text: '[ ESTABLISHING CONNECTION ]', delay: 600, color: '#8B5CFF' },
-  { text: '[ DEVELOPER PROFILE FOUND ]', delay: 1300, color: '#71FF9C' },
-  { text: '[ UNIVERSE ONLINE ]', delay: 2000, color: '#00F5FF' },
+const BOOT_STEPS = [
+  { text: 'Loading system modules...', delay: 250 },
+  { text: 'Connecting to Anirudh Yadav...', delay: 850 },
+  { text: 'Developer profile found.', delay: 1500 },
+  { text: 'Initializing 3D universe...', delay: 2100 },
+  { text: 'Universe online.', delay: 2700 },
 ];
 
 export default function BootSequence({ onComplete }) {
-  const [visibleLines, setVisibleLines] = useState([]);
-  const [done, setDone] = useState(false);
-  const [skipped, setSkipped] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [isReady, setIsReady] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const timerRefs = useRef([]);
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      // Skip immediately for reduced motion
-      setTimeout(() => onComplete(), 100);
+      onComplete();
       return;
     }
 
-    BOOT_LINES.forEach((line, i) => {
-      const t = setTimeout(() => {
-        setVisibleLines(prev => [...prev, i]);
-      }, line.delay);
-      timerRefs.current.push(t);
+    // Progress animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return Math.min(prev + 2, 100);
+      });
+    }, 55);
+    timerRefs.current.push(progressInterval);
+
+    // Sequential step display
+    BOOT_STEPS.forEach((step, idx) => {
+      const timer = setTimeout(() => {
+        setCompletedSteps((prev) => [...prev, idx]);
+      }, step.delay);
+      timerRefs.current.push(timer);
     });
 
-    const finishTimer = setTimeout(() => {
-      setDone(true);
-      setTimeout(() => onComplete(), 600);
-    }, 2800);
-    timerRefs.current.push(finishTimer);
+    // Ready to enter
+    const readyTimer = setTimeout(() => {
+      setProgress(100);
+      setIsReady(true);
+    }, 3000);
+    timerRefs.current.push(readyTimer);
 
-    return () => timerRefs.current.forEach(clearTimeout);
+    return () => {
+      timerRefs.current.forEach(clearInterval);
+      timerRefs.current.forEach(clearTimeout);
+    };
   }, [prefersReducedMotion, onComplete]);
 
-  const handleSkip = () => {
+  const handleEnter = () => {
+    timerRefs.current.forEach(clearInterval);
     timerRefs.current.forEach(clearTimeout);
-    setSkipped(true);
     onComplete();
   };
 
   return (
-    <div style={styles.container} aria-label="System boot sequence">
-      {/* Background grid */}
-      <div style={styles.grid} aria-hidden="true" />
+    <div style={styles.container} role="dialog" aria-label="System boot sequence">
+      {/* Background Starfield and Cyber Grid */}
+      <div style={styles.gridOverlay} aria-hidden="true" />
+      <div style={styles.vignette} aria-hidden="true" />
 
-      {/* Logo */}
-      <div style={styles.logo} aria-hidden="true">
-        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
-          <defs>
-            <radialGradient id="bg1" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#00F5FF" stopOpacity="0.9"/>
-              <stop offset="60%" stopColor="#8B5CFF" stopOpacity="0.6"/>
-              <stop offset="100%" stopColor="#05060B"/>
-            </radialGradient>
-          </defs>
-          <circle cx="30" cy="30" r="28" fill="url(#bg1)" />
-          <circle cx="30" cy="30" r="20" fill="none" stroke="#00F5FF" strokeWidth="0.8" opacity="0.5"/>
-          <circle cx="30" cy="30" r="12" fill="#090D19"/>
-          <circle cx="30" cy="30" r="5" fill="#00F5FF" opacity="0.95"/>
-        </svg>
-        <span style={styles.logoText}>NEONVERSE</span>
-      </div>
+      {/* Main Terminal Window */}
+      <div style={styles.card}>
+        {/* Title Block */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>NEONVERSE</h1>
+          <div style={styles.subtitle}>INITIALIZING DEVELOPER UNIVERSE...</div>
+        </div>
 
-      {/* Terminal lines */}
-      <div style={styles.terminal} role="log" aria-live="polite">
-        {BOOT_LINES.map((line, i) => (
-          <div
-            key={i}
+        {/* Terminal Box */}
+        <div style={styles.terminalBox}>
+          {/* Corner tech accents */}
+          <div style={{ ...styles.corner, top: -1, left: -1, borderWidth: '2px 0 0 2px' }} />
+          <div style={{ ...styles.corner, top: -1, right: -1, borderWidth: '2px 2px 0 0' }} />
+          <div style={{ ...styles.corner, bottom: -1, left: -1, borderWidth: '0 0 2px 2px' }} />
+          <div style={{ ...styles.corner, bottom: -1, right: -1, borderWidth: '0 2px 2px 0' }} />
+
+          {/* Steps checklist */}
+          <div style={styles.stepList} role="status" aria-live="polite">
+            {BOOT_STEPS.map((step, idx) => {
+              const isChecked = completedSteps.includes(idx);
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    ...styles.stepItem,
+                    opacity: isChecked ? 1 : 0.25,
+                    transform: isChecked ? 'translateX(0)' : 'translateX(-4px)',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <span style={{ color: isChecked ? '#00F5FF' : 'rgba(0,245,255,0.3)', marginRight: '8px' }}>
+                    [✓]
+                  </span>
+                  <span style={{ color: isChecked ? '#F4F7FF' : '#929BB3' }}>
+                    {step.text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Progress bar and counter */}
+          <div style={styles.progressRow}>
+            <div style={styles.progressBarBg} aria-hidden="true">
+              <div
+                style={{
+                  ...styles.progressBarFill,
+                  width: `${progress}%`,
+                }}
+              />
+            </div>
+            <span style={styles.progressText}>{progress}%</span>
+          </div>
+        </div>
+
+        {/* Enter Button */}
+        <div style={styles.actions}>
+          <button
+            onClick={handleEnter}
             style={{
-              ...styles.termLine,
-              color: line.color,
-              opacity: visibleLines.includes(i) ? 1 : 0,
-              transform: visibleLines.includes(i) ? 'translateY(0)' : 'translateY(8px)',
-              transition: 'opacity 0.4s ease, transform 0.4s ease',
+              ...styles.enterBtn,
+              opacity: isReady ? 1 : 0.85,
+              boxShadow: isReady
+                ? '0 0 25px rgba(0, 245, 255, 0.45), inset 0 0 15px rgba(0, 245, 255, 0.2)'
+                : '0 0 15px rgba(0, 245, 255, 0.2)',
             }}
+            aria-label="Enter NEONVERSE"
           >
-            <span style={styles.prompt}>▶</span>
-            {line.text}
-          </div>
-        ))}
-        {done && (
-          <div style={styles.cursor} aria-hidden="true">
-            <span style={styles.promptSymbol}>visitor@neonverse:~$</span>
-            <span style={styles.blink}>█</span>
-          </div>
-        )}
-      </div>
+            ENTER NEONVERSE →
+          </button>
 
-      {/* Skip button */}
-      {!skipped && (
-        <button
-          onClick={handleSkip}
-          style={styles.skipBtn}
-          aria-label="Skip intro animation"
-        >
-          SKIP INTRO ›
-        </button>
-      )}
-
-      {/* Loading bar */}
-      <div style={styles.loadingBar} aria-hidden="true">
-        <div
-          style={{
-            ...styles.loadingFill,
-            width: done ? '100%' : `${(visibleLines.length / BOOT_LINES.length) * 100}%`,
-          }}
-        />
+          <button
+            onClick={handleEnter}
+            style={styles.skipLink}
+            aria-label="Skip introduction"
+          >
+            Skip Intro
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -122,99 +157,155 @@ const styles = {
     inset: 0,
     background: '#05060B',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '40px',
-    zIndex: 9000,
+    zIndex: 9999,
     overflow: 'hidden',
+    padding: '20px',
   },
-  grid: {
+  gridOverlay: {
     position: 'absolute',
     inset: 0,
     backgroundImage: `
-      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px)
+      linear-gradient(rgba(0, 245, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 245, 255, 0.035) 1px, transparent 1px)
     `,
     backgroundSize: '40px 40px',
     pointerEvents: 'none',
   },
-  logo: {
+  vignette: {
+    position: 'absolute',
+    inset: 0,
+    background: 'radial-gradient(circle at center, transparent 30%, #05060B 90%)',
+    pointerEvents: 'none',
+  },
+  card: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '520px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '12px',
+    textAlign: 'center',
+    gap: '28px',
+    zIndex: 2,
   },
-  logoText: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '13px',
-    letterSpacing: '0.4em',
-    color: 'rgba(0,245,255,0.7)',
-    textTransform: 'uppercase',
-  },
-  terminal: {
-    width: '100%',
-    maxWidth: '480px',
+  header: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
-    padding: '0 24px',
-  },
-  termLine: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '13px',
-    letterSpacing: '0.05em',
-    display: 'flex',
     alignItems: 'center',
     gap: '10px',
   },
-  prompt: {
-    opacity: 0.6,
-    fontSize: '10px',
-    flexShrink: 0,
-  },
-  cursor: {
-    marginTop: '8px',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '13px',
+  title: {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontSize: 'clamp(32px, 5vw, 46px)',
+    fontWeight: 800,
+    letterSpacing: '0.22em',
     color: '#00F5FF',
+    textShadow: '0 0 20px rgba(0, 245, 255, 0.6), 0 0 40px rgba(255, 53, 211, 0.3)',
+    margin: 0,
+    lineHeight: 1,
+  },
+  subtitle: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    letterSpacing: '0.15em',
+    color: 'rgba(0, 245, 255, 0.75)',
+    textTransform: 'uppercase',
+  },
+  terminalBox: {
+    width: '100%',
+    background: 'rgba(9, 13, 25, 0.75)',
+    border: '1px solid rgba(0, 245, 255, 0.25)',
+    borderRadius: '8px',
+    padding: '24px 28px',
+    position: 'relative',
+    boxShadow: '0 0 40px rgba(0, 245, 255, 0.08), inset 0 0 30px rgba(9, 13, 25, 0.8)',
+    backdropFilter: 'blur(16px)',
+  },
+  corner: {
+    position: 'absolute',
+    width: '10px',
+    height: '10px',
+    borderColor: '#00F5FF',
+    borderStyle: 'solid',
+    pointerEvents: 'none',
+  },
+  stepList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    textAlign: 'left',
+    marginBottom: '24px',
+  },
+  stepItem: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '12.5px',
+    letterSpacing: '0.04em',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
   },
-  promptSymbol: {
-    opacity: 0.6,
+  progressRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    borderTop: '1px solid rgba(0, 245, 255, 0.12)',
+    paddingTop: '18px',
   },
-  blink: {
-    display: 'inline-block',
-    animation: 'blink 1s step-end infinite',
+  progressBarBg: {
+    flex: 1,
+    height: '6px',
+    background: 'rgba(0, 245, 255, 0.1)',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    border: '1px solid rgba(0, 245, 255, 0.2)',
   },
-  skipBtn: {
-    position: 'absolute',
-    top: '24px',
-    right: '24px',
+  progressBarFill: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #00F5FF 0%, #8B5CFF 60%, #FF35D3 100%)',
+    boxShadow: '0 0 12px rgba(0, 245, 255, 0.8)',
+    transition: 'width 0.1s linear',
+  },
+  progressText: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#00F5FF',
+    minWidth: '38px',
+    textAlign: 'right',
+  },
+  actions: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '14px',
+    width: '100%',
+  },
+  enterBtn: {
+    background: 'rgba(0, 245, 255, 0.1)',
+    border: '1px solid #00F5FF',
+    borderRadius: '30px',
+    color: '#00F5FF',
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontSize: '14px',
+    fontWeight: 700,
+    letterSpacing: '0.12em',
+    padding: '14px 36px',
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    textTransform: 'uppercase',
+  },
+  skipLink: {
     background: 'transparent',
-    border: '1px solid rgba(0,245,255,0.3)',
-    color: 'rgba(0,245,255,0.7)',
+    border: 'none',
+    color: 'rgba(146, 155, 179, 0.65)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '11px',
     letterSpacing: '0.08em',
-    padding: '8px 16px',
     cursor: 'pointer',
-    borderRadius: '4px',
-    transition: 'all 0.2s ease',
-  },
-  loadingBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    background: 'rgba(0,245,255,0.1)',
-  },
-  loadingFill: {
-    height: '100%',
-    background: 'linear-gradient(90deg, #8B5CFF, #00F5FF)',
-    transition: 'width 0.4s ease',
+    padding: '4px',
+    textDecoration: 'underline',
+    textUnderlineOffset: '3px',
+    transition: 'color 0.2s',
   },
 };

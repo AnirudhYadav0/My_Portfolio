@@ -1,7 +1,8 @@
-import React from 'react';
-import { RotateCcw, Terminal, Briefcase } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Volume2, VolumeX, Github, Terminal, Briefcase, Globe, Layers, ChevronRight } from 'lucide-react';
 import { DESTINATIONS } from '../data/destinations';
 import { profile } from '../data/profile';
+import { toggleAmbientAudio, playCyberClick } from '../utils/audioSynth';
 
 export default function UniverseNavigation({
   selectedId,
@@ -12,176 +13,372 @@ export default function UniverseNavigation({
   isRecruiterMode,
 }) {
   const selected = DESTINATIONS.find(d => d.id === selectedId);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [isMuted, setIsMuted] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleAudioToggle = () => {
+    const active = toggleAmbientAudio();
+    setIsMuted(!active);
+  };
 
   return (
     <>
-      {/* Top HUD bar */}
-      <div style={styles.topBar} role="banner">
-        {/* Logo */}
-        <div style={styles.logo}>
-          <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+      {/* Top HUD Bar */}
+      <header style={styles.topBar} role="banner">
+        {/* Left: Cyber Geometric Emblem + Brand */}
+        <div style={styles.logo} onClick={onReset} role="button" tabIndex={0} aria-label="Return to Universe overview">
+          <svg width="30" height="30" viewBox="0 0 36 36" aria-hidden="true">
             <defs>
-              <radialGradient id="nl" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#00F5FF" stopOpacity="0.9"/>
-                <stop offset="100%" stopColor="#090D19"/>
-              </radialGradient>
+              <linearGradient id="neonHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00F5FF" />
+                <stop offset="100%" stopColor="#FF35D3" />
+              </linearGradient>
             </defs>
-            <circle cx="16" cy="16" r="14" fill="url(#nl)" />
-            <circle cx="16" cy="16" r="5" fill="#090D19"/>
-            <circle cx="16" cy="16" r="2" fill="#00F5FF"/>
+            {/* Hexagon tech boundary */}
+            <polygon
+              points="18,3 32,10.5 32,25.5 18,33 4,25.5 4,10.5"
+              fill="rgba(9, 13, 25, 0.7)"
+              stroke="url(#neonHexGrad)"
+              strokeWidth="1.8"
+            />
+            {/* Inner gyro core */}
+            <circle cx="18" cy="18" r="6" fill="#090D19" stroke="#00F5FF" strokeWidth="1.2" />
+            <circle cx="18" cy="18" r="2.5" fill="#FF35D3" />
           </svg>
-          <div>
-            <div style={styles.logoName}>NEONVERSE</div>
-            <div style={styles.logoSub}>ANIRUDH YADAV</div>
-          </div>
+          <div style={styles.brandTitle}>NEONVERSE</div>
         </div>
 
-        {/* Nav controls */}
-        <nav style={styles.navControls} aria-label="Universe controls">
-          <button
-            style={styles.iconBtn}
-            onClick={onReset}
-            title="Reset view"
-            aria-label="Reset camera to default view"
-          >
-            <RotateCcw size={16} />
-          </button>
-          <button
-            style={styles.iconBtn}
-            onClick={onTerminal}
-            title="Open terminal"
-            aria-label="Open developer terminal"
-          >
-            <Terminal size={16} />
-            <span style={styles.btnLabel}>TERMINAL</span>
-          </button>
-          <button
-            onClick={onRecruiterMode}
-            style={{
-              ...styles.recruiterBtn,
-              background: isRecruiterMode ? 'rgba(0,245,255,0.15)' : 'transparent',
-              borderColor: isRecruiterMode ? '#00F5FF' : 'rgba(146,155,179,0.3)',
-              color: isRecruiterMode ? '#00F5FF' : '#929BB3',
-            }}
-            aria-label={isRecruiterMode ? 'Switch to Explorer Mode' : 'Switch to Recruiter Mode'}
-            aria-pressed={isRecruiterMode}
-          >
-            <Briefcase size={14} />
-            {isRecruiterMode ? 'EXPLORER' : 'RECRUITER'}
-          </button>
-        </nav>
-      </div>
+        {/* Center: Segmented Navigation Pill Switcher (Desktop/Tablet) */}
+        {!isMobile && (
+          <nav style={styles.centerSegment} aria-label="Primary navigation modes">
+            <button
+              onClick={() => {
+                playCyberClick();
+                if (isRecruiterMode) onRecruiterMode();
+                onReset();
+              }}
+              style={{
+                ...styles.segmentBtn,
+                background: !isRecruiterMode && !selectedId ? 'rgba(0, 245, 255, 0.18)' : 'transparent',
+                color: !isRecruiterMode && !selectedId ? '#00F5FF' : '#929BB3',
+                borderColor: !isRecruiterMode && !selectedId ? '#00F5FF' : 'transparent',
+                boxShadow: !isRecruiterMode && !selectedId ? '0 0 16px rgba(0, 245, 255, 0.35)' : 'none',
+              }}
+              aria-pressed={!isRecruiterMode && !selectedId}
+            >
+              UNIVERSE
+            </button>
 
-      {/* Hero overlay — only visible when nothing selected */}
+            <button
+              onClick={() => {
+                playCyberClick();
+                onTerminal();
+              }}
+              style={{
+                ...styles.segmentBtn,
+                color: '#929BB3',
+                borderColor: 'transparent',
+              }}
+            >
+              TERMINAL
+            </button>
+
+            <button
+              onClick={() => {
+                playCyberClick();
+                onRecruiterMode();
+              }}
+              style={{
+                ...styles.segmentBtn,
+                background: isRecruiterMode ? 'rgba(0, 245, 255, 0.18)' : 'transparent',
+                color: isRecruiterMode ? '#00F5FF' : '#929BB3',
+                borderColor: isRecruiterMode ? '#00F5FF' : 'transparent',
+                boxShadow: isRecruiterMode ? '0 0 16px rgba(0, 245, 255, 0.35)' : 'none',
+              }}
+              aria-pressed={isRecruiterMode}
+            >
+              RECRUITER MODE
+            </button>
+          </nav>
+        )}
+
+        {/* Right: Audio Ambient Toggle & GitHub */}
+        <div style={styles.rightActions}>
+          <button
+            onClick={handleAudioToggle}
+            style={{
+              ...styles.iconBtn,
+              borderColor: !isMuted ? '#00F5FF' : 'rgba(146, 155, 179, 0.25)',
+              color: !isMuted ? '#00F5FF' : '#929BB3',
+              background: !isMuted ? 'rgba(0, 245, 255, 0.12)' : 'transparent',
+              boxShadow: !isMuted ? '0 0 14px rgba(0, 245, 255, 0.4)' : 'none',
+            }}
+            title={isMuted ? 'Play Ambient Sci-Fi Audio' : 'Mute Ambient Audio'}
+            aria-label={isMuted ? 'Play Ambient Sci-Fi Audio' : 'Mute Ambient Audio'}
+          >
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.iconBtn}
+            title="GitHub Repository"
+            aria-label="GitHub Profile"
+          >
+            <Github size={15} />
+          </a>
+        </div>
+      </header>
+
+      {/* Hero Left Content Overlay — visible when no world is selected */}
       {!selectedId && (
-        <div style={styles.heroOverlay} aria-live="polite">
-          <div style={styles.heroContent}>
+        <section
+          style={{
+            ...styles.heroOverlay,
+            paddingLeft: isMobile ? '20px' : '48px',
+            paddingRight: isMobile ? '20px' : '0',
+            alignItems: isMobile ? 'flex-end' : 'center',
+            paddingBottom: isMobile ? '130px' : '0',
+            maxWidth: isMobile ? '100%' : '620px',
+          }}
+          aria-live="polite"
+        >
+          <div style={{
+            ...styles.heroContent,
+            alignItems: isMobile ? 'center' : 'flex-start',
+            textAlign: isMobile ? 'center' : 'left',
+          }}>
+            {/* Tag */}
             <div style={styles.heroTag} aria-hidden="true">
               <span style={styles.tagDot} />
               FULL-STACK DEVELOPER / DIGITAL BUILDER
             </div>
-            <h1 style={styles.heroName}>ANIRUDH YADAV</h1>
+
+            {/* Glowing Dual-Tone Name Header */}
+            <h1 style={styles.heroName}>
+              <span style={styles.nameCyan}>ANIRUDH </span>
+              <span style={styles.nameMagenta}>YADAV</span>
+            </h1>
+
+            {/* Subtitle */}
             <p style={styles.heroTagline}>
               "Building meaningful digital experiences, one world at a time."
             </p>
+
+            {/* Actions */}
             <div style={styles.heroActions}>
               <button
-                style={styles.primaryBtn}
-                onClick={() => onSelect('about')}
-                aria-label="Explore the universe — start with About Me"
+                style={styles.exploreBtn}
+                onClick={() => {
+                  playCyberClick();
+                  onSelect('about');
+                }}
+                aria-label="Explore Universe — start with About Me"
               >
-                EXPLORE UNIVERSE
+                EXPLORE UNIVERSE <ChevronRight size={16} />
               </button>
+
               <a
                 href={profile.resume || '/resume.pdf'}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={styles.secondaryBtn}
+                download="Anirudh_Yadav_Resume.pdf"
+                style={styles.resumeBtn}
                 aria-label="Quick view resume"
               >
                 QUICK VIEW RESUME
               </a>
             </div>
-            <div style={styles.instruction} aria-label="Navigation hint">
-              Drag to explore · Select a planet to discover
-            </div>
+
+            {/* Bottom-left interaction guides (Desktop) */}
+            {!isMobile && (
+              <div style={styles.instructionList} aria-label="Navigation controls hint">
+                <div style={styles.instructionItem}>
+                  <span style={styles.instructionIcon}>↓</span> Drag to explore
+                </div>
+                <div style={styles.instructionItem}>
+                  <span style={styles.instructionIcon}>↓</span> Scroll to zoom
+                </div>
+                <div style={styles.instructionItem}>
+                  <span style={styles.instructionIcon}>⊙</span> Click a planet
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Bottom planet selector */}
-      {!selectedId && (
-        <nav style={styles.bottomNav} aria-label="Planet destinations">
+      {/* Bottom Center Planet Quick Dock (Desktop) */}
+      {!selectedId && !isMobile && (
+        <nav style={styles.bottomDock} aria-label="Planet navigation dock">
           {DESTINATIONS.map(dest => (
             <button
               key={dest.id}
+              onClick={() => {
+                playCyberClick();
+                onSelect(dest.id);
+              }}
               style={{
-                ...styles.destBtn,
-                borderColor: `${dest.color}40`,
+                ...styles.dockItem,
+                borderColor: `${dest.color}35`,
                 color: dest.color,
               }}
-              onClick={() => onSelect(dest.id)}
-              aria-label={`Navigate to ${dest.label} — ${dest.sublabel}`}
+              aria-label={`Navigate to ${dest.label}`}
             >
-              <span style={{...styles.destDot, background: dest.color}} />
-              <span style={styles.destLabel}>{dest.label}</span>
+              <span style={{ ...styles.dockDot, background: dest.color, boxShadow: `0 0 8px ${dest.color}` }} />
+              <span>{dest.label}</span>
             </button>
           ))}
         </nav>
       )}
 
-      {/* Selected destination breadcrumb with quick world cycling */}
-      {selectedId && (
-        <div style={styles.breadcrumb} aria-current="page" aria-label={`Currently viewing: ${selected?.label}`}>
+      {/* Bottom Right Mode Pill Switcher */}
+      {!selectedId && !isMobile && (
+        <div style={styles.bottomRightToggle}>
           <button
-            style={styles.breadcrumbBack}
-            onClick={() => onSelect(null)}
-            aria-label="Return to universe overview"
-            title="Return to universe overview (or press Esc / R)"
+            onClick={() => {
+              playCyberClick();
+              onRecruiterMode();
+            }}
+            style={styles.modeToggleBtn}
+            aria-label="Toggle Recruiter or Explorer Mode"
           >
-            ← UNIVERSE
+            <span style={{ ...styles.modeDot, background: isRecruiterMode ? '#FF35D3' : '#00F5FF' }} />
+            {isRecruiterMode ? 'RECRUITER MODE' : 'EXPLORER MODE'}
           </button>
-          <span style={styles.breadcrumbSep} aria-hidden="true">›</span>
-          <span style={{ color: selected?.color || '#00F5FF', fontWeight: 700 }}>{selected?.label}</span>
-
-          <div style={styles.cycleGroup}>
-            <button
-              onClick={() => {
-                const ids = DESTINATIONS.map(d => d.id);
-                const idx = ids.indexOf(selectedId);
-                const prev = ids[(idx - 1 + ids.length) % ids.length];
-                onSelect(prev);
-              }}
-              style={styles.cycleBtn}
-              title="Previous world (Left Arrow)"
-              aria-label="Navigate to previous world"
-            >
-              ◀
-            </button>
-            <button
-              onClick={() => {
-                const ids = DESTINATIONS.map(d => d.id);
-                const idx = ids.indexOf(selectedId);
-                const next = ids[(idx + 1) % ids.length];
-                onSelect(next);
-              }}
-              style={styles.cycleBtn}
-              title="Next world (Right Arrow)"
-              aria-label="Navigate to next world"
-            >
-              ▶
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Keyboard shortcut hint (hidden when a panel is open) */}
-      {!selectedId && (
-        <div style={styles.shortcuts} aria-hidden="true">
-          <span>` terminal</span>
-          <span>←/→ cycle</span>
-          <span>M recruiter</span>
-          <span>R reset</span>
+      {/* Selected Destination Breadcrumb Header */}
+      {selectedId && (
+        <div style={styles.breadcrumb} aria-current="page" aria-label={`Viewing ${selected?.label}`}>
+          <button
+            style={styles.breadcrumbBack}
+            onClick={() => {
+              playCyberClick();
+              onSelect(null);
+            }}
+            aria-label="Return to Universe overview"
+          >
+            ← BACK TO UNIVERSE
+          </button>
+          <span style={styles.breadcrumbSep} aria-hidden="true">/</span>
+          <span style={{ color: selected?.color || '#00F5FF', fontWeight: 700 }}>
+            {selected?.label}
+          </span>
+          <span style={{ color: '#929BB3', fontSize: '11px', marginLeft: '4px' }}>
+            ({selected?.sublabel})
+          </span>
+        </div>
+      )}
+
+      {/* Mobile Bottom Dock Bar (Concept image top-right reference) */}
+      {isMobile && (
+        <nav style={styles.mobileDock} aria-label="Mobile navigation bar">
+          <button
+            style={{
+              ...styles.mobileDockBtn,
+              color: !isRecruiterMode && !selectedId ? '#00F5FF' : '#929BB3',
+            }}
+            onClick={() => {
+              playCyberClick();
+              if (isRecruiterMode) onRecruiterMode();
+              onReset();
+            }}
+            aria-label="Universe"
+          >
+            <Globe size={18} />
+            <span>Universe</span>
+          </button>
+
+          <button
+            style={styles.mobileDockBtn}
+            onClick={() => {
+              playCyberClick();
+              onTerminal();
+            }}
+            aria-label="Terminal"
+          >
+            <Terminal size={18} />
+            <span>Terminal</span>
+          </button>
+
+          <button
+            style={{
+              ...styles.mobileDockBtn,
+              color: isRecruiterMode ? '#00F5FF' : '#929BB3',
+            }}
+            onClick={() => {
+              playCyberClick();
+              onRecruiterMode();
+            }}
+            aria-label="Recruiter Mode"
+          >
+            <Briefcase size={18} />
+            <span>Recruiter</span>
+          </button>
+
+          <button
+            style={{
+              ...styles.mobileDockBtn,
+              color: mobileMenuOpen || selectedId ? '#00F5FF' : '#929BB3',
+            }}
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            aria-label="Worlds Menu"
+          >
+            <Layers size={18} />
+            <span>Worlds</span>
+          </button>
+        </nav>
+      )}
+
+      {/* Mobile Worlds Drawer Menu */}
+      {isMobile && mobileMenuOpen && (
+        <div style={styles.mobileMenuModal} role="dialog" aria-label="Worlds menu">
+          <div style={styles.mobileMenuHeader}>
+            <span>CHOOSE DESTINATION</span>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              style={styles.mobileMenuClose}
+              aria-label="Close worlds menu"
+            >
+              ✕
+            </button>
+          </div>
+          <div style={styles.mobileMenuList}>
+            {DESTINATIONS.map(d => (
+              <button
+                key={d.id}
+                onClick={() => {
+                  playCyberClick();
+                  onSelect(d.id);
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  ...styles.mobileMenuItem,
+                  borderColor: `${d.color}44`,
+                  color: d.color,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ ...styles.dockDot, background: d.color }} />
+                  <span style={{ fontWeight: 700, fontSize: '13px' }}>{d.label}</span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#929BB3' }}>{d.sublabel}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </>
@@ -194,73 +391,70 @@ const styles = {
     top: 0,
     left: 0,
     right: 0,
-    height: '60px',
+    height: '64px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 24px',
-    background: 'linear-gradient(180deg, rgba(5,6,11,0.95) 0%, rgba(5,6,11,0) 100%)',
-    zIndex: 3000,
+    padding: '0 28px',
+    background: 'linear-gradient(180deg, rgba(5,6,11,0.92) 0%, rgba(5,6,11,0) 100%)',
+    zIndex: 4000,
     pointerEvents: 'all',
   },
   logo: {
     display: 'flex',
     alignItems: 'center',
+    gap: '12px',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
+  brandTitle: {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontSize: '15px',
+    fontWeight: 800,
+    letterSpacing: '0.22em',
+    color: '#00F5FF',
+    textShadow: '0 0 14px rgba(0,245,255,0.6)',
+  },
+  centerSegment: {
+    display: 'flex',
+    alignItems: 'center',
+    background: 'rgba(9, 13, 25, 0.7)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0, 245, 255, 0.18)',
+    borderRadius: '30px',
+    padding: '4px',
+    gap: '4px',
+  },
+  segmentBtn: {
+    background: 'transparent',
+    border: '1px solid transparent',
+    borderRadius: '24px',
+    padding: '7px 18px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    cursor: 'pointer',
+    transition: 'all 0.22s ease',
+  },
+  rightActions: {
+    display: 'flex',
+    alignItems: 'center',
     gap: '10px',
   },
-  logoName: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '12px',
-    fontWeight: 700,
-    letterSpacing: '0.25em',
-    color: '#00F5FF',
-    lineHeight: 1,
-  },
-  logoSub: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '9px',
-    letterSpacing: '0.15em',
-    color: 'rgba(146,155,179,0.7)',
-    marginTop: '2px',
-  },
-  navControls: {
+  iconBtn: {
+    background: 'rgba(9, 13, 25, 0.6)',
+    border: '1px solid rgba(146, 155, 179, 0.25)',
+    borderRadius: '50%',
+    width: '36px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-  },
-  iconBtn: {
-    background: 'transparent',
-    border: '1px solid rgba(146,155,179,0.2)',
-    borderRadius: '6px',
+    justifyContent: 'center',
     color: '#929BB3',
     cursor: 'pointer',
-    padding: '7px 12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
     transition: 'all 0.2s ease',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '11px',
-    letterSpacing: '0.05em',
-  },
-  btnLabel: {
-    display: 'none',
-    '@media (min-width: 600px)': { display: 'inline' },
-  },
-  recruiterBtn: {
-    background: 'transparent',
-    border: '1px solid',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    padding: '7px 14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '11px',
-    letterSpacing: '0.08em',
-    transition: 'all 0.2s ease',
-    fontWeight: 600,
+    textDecoration: 'none',
   },
   heroOverlay: {
     position: 'fixed',
@@ -268,27 +462,25 @@ const styles = {
     top: 0,
     bottom: 0,
     width: '100%',
-    maxWidth: '600px',
     display: 'flex',
     alignItems: 'center',
-    paddingLeft: '48px',
     zIndex: 2000,
     pointerEvents: 'none',
   },
   heroContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
+    gap: '18px',
     pointerEvents: 'all',
   },
   heroTag: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '11px',
     letterSpacing: '0.12em',
-    color: 'rgba(0,245,255,0.7)',
+    color: '#00F5FF',
     textTransform: 'uppercase',
   },
   tagDot: {
@@ -296,87 +488,103 @@ const styles = {
     height: '6px',
     borderRadius: '50%',
     background: '#00F5FF',
-    animation: 'pulse-cyan 2s ease-in-out infinite',
-    flexShrink: 0,
+    boxShadow: '0 0 10px #00F5FF',
   },
   heroName: {
     fontFamily: "'Space Grotesk', sans-serif",
-    fontSize: 'clamp(36px, 5vw, 64px)',
-    fontWeight: 700,
+    fontSize: 'clamp(38px, 5.5vw, 68px)',
+    fontWeight: 800,
     letterSpacing: '-0.02em',
+    lineHeight: 1.02,
+    margin: 0,
+  },
+  nameCyan: {
     color: '#F4F7FF',
-    lineHeight: 1,
-    textShadow: '0 0 80px rgba(0,245,255,0.15)',
+    textShadow: '0 0 40px rgba(0, 245, 255, 0.65)',
+  },
+  nameMagenta: {
+    color: '#FF35D3',
+    textShadow: '0 0 45px rgba(255, 53, 211, 0.75)',
   },
   heroTagline: {
     fontFamily: "'Space Grotesk', sans-serif",
     fontSize: '16px',
     color: '#929BB3',
-    maxWidth: '400px',
+    maxWidth: '430px',
     lineHeight: 1.6,
-    fontStyle: 'italic',
+    margin: 0,
   },
   heroActions: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '12px',
-    alignItems: 'center',
+    gap: '14px',
+    marginTop: '6px',
   },
-  primaryBtn: {
-    background: '#00F5FF',
-    color: '#05060B',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '13px 28px',
+  exploreBtn: {
+    background: 'rgba(0, 245, 255, 0.1)',
+    border: '1.5px solid #00F5FF',
+    borderRadius: '30px',
+    color: '#00F5FF',
+    padding: '12px 28px',
     fontFamily: "'Space Grotesk', sans-serif",
-    fontSize: '14px',
+    fontSize: '13.5px',
     fontWeight: 700,
     letterSpacing: '0.08em',
     cursor: 'pointer',
-    textTransform: 'uppercase',
-    transition: 'all 0.2s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 0 24px rgba(0, 245, 255, 0.35)',
+    transition: 'all 0.25s ease',
   },
-  secondaryBtn: {
+  resumeBtn: {
     background: 'transparent',
-    border: '1px solid rgba(0,245,255,0.4)',
-    color: '#00F5FF',
-    borderRadius: '8px',
+    border: '1px solid rgba(146, 155, 179, 0.35)',
+    borderRadius: '30px',
+    color: '#F4F7FF',
     padding: '12px 24px',
     fontFamily: "'Space Grotesk', sans-serif",
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 600,
     letterSpacing: '0.08em',
-    cursor: 'pointer',
     textDecoration: 'none',
     display: 'inline-flex',
     alignItems: 'center',
-    transition: 'all 0.2s ease',
-    textTransform: 'uppercase',
+    transition: 'all 0.25s ease',
   },
-  instruction: {
+  instructionList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    marginTop: '20px',
+  },
+  instructionItem: {
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '11px',
-    color: 'rgba(146,155,179,0.5)',
-    letterSpacing: '0.04em',
+    color: 'rgba(146, 155, 179, 0.55)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
-  bottomNav: {
+  instructionIcon: {
+    color: '#00F5FF',
+  },
+  bottomDock: {
     position: 'fixed',
-    bottom: '32px',
+    bottom: '28px',
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
     gap: '8px',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    padding: '12px 20px',
-    background: 'rgba(9,13,25,0.7)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(0,245,255,0.1)',
+    padding: '8px 16px',
+    background: 'rgba(9, 13, 25, 0.75)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0, 245, 255, 0.18)',
     borderRadius: '40px',
     zIndex: 2000,
-    maxWidth: '90vw',
+    boxShadow: '0 0 30px rgba(0, 0, 0, 0.6)',
   },
-  destBtn: {
+  dockItem: {
     background: 'transparent',
     border: '1px solid',
     borderRadius: '20px',
@@ -385,80 +593,150 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    transition: 'all 0.2s ease',
     fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '10px',
-    letterSpacing: '0.08em',
+    fontSize: '10.5px',
     fontWeight: 600,
+    letterSpacing: '0.06em',
+    transition: 'all 0.2s',
   },
-  destDot: {
-    width: '5px',
-    height: '5px',
+  dockDot: {
+    width: '6px',
+    height: '6px',
     borderRadius: '50%',
     flexShrink: 0,
   },
-  destLabel: {
-    whiteSpace: 'nowrap',
+  bottomRightToggle: {
+    position: 'fixed',
+    bottom: '28px',
+    right: '28px',
+    zIndex: 2000,
+  },
+  modeToggleBtn: {
+    background: 'rgba(9, 13, 25, 0.75)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0, 245, 255, 0.2)',
+    borderRadius: '30px',
+    padding: '8px 16px',
+    color: '#F4F7FF',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10.5px',
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 0.2s ease',
+  },
+  modeDot: {
+    width: '7px',
+    height: '7px',
+    borderRadius: '50%',
+    boxShadow: '0 0 8px currentColor',
   },
   breadcrumb: {
     position: 'fixed',
-    bottom: '24px',
-    left: '24px',
+    top: '76px',
+    left: '28px',
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '11px',
-    color: '#929BB3',
     letterSpacing: '0.08em',
-    zIndex: 3000,
-    background: 'rgba(9,13,25,0.7)',
-    backdropFilter: 'blur(8px)',
-    padding: '8px 16px',
+    zIndex: 3500,
+    background: 'rgba(9, 13, 25, 0.85)',
+    backdropFilter: 'blur(10px)',
+    padding: '7px 16px',
     borderRadius: '20px',
-    border: '1px solid rgba(0,245,255,0.1)',
+    border: '1px solid rgba(0, 245, 255, 0.2)',
   },
   breadcrumbBack: {
     background: 'transparent',
     border: 'none',
-    color: '#929BB3',
+    color: '#00F5FF',
     cursor: 'pointer',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '11px',
-    letterSpacing: '0.08em',
-    transition: 'color 0.2s',
+    fontWeight: 700,
     padding: 0,
   },
   breadcrumbSep: {
-    color: 'rgba(146,155,179,0.3)',
+    color: 'rgba(146, 155, 179, 0.3)',
   },
-  cycleGroup: {
-    display: 'flex',
-    gap: '4px',
-    marginLeft: '6px',
-  },
-  cycleBtn: {
-    background: 'transparent',
-    border: '1px solid rgba(0,245,255,0.2)',
-    borderRadius: '6px',
-    color: '#929BB3',
-    cursor: 'pointer',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '10px',
-    padding: '2px 7px',
-    lineHeight: 1.6,
-    transition: 'all 0.2s ease',
-  },
-  shortcuts: {
+  mobileDock: {
     position: 'fixed',
-    bottom: '24px',
-    right: '24px',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '60px',
+    background: 'rgba(9, 13, 25, 0.95)',
+    backdropFilter: 'blur(20px)',
+    borderTop: '1px solid rgba(0, 245, 255, 0.2)',
     display: 'flex',
-    gap: '16px',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    zIndex: 3500,
+    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+  },
+  mobileDockBtn: {
+    background: 'transparent',
+    border: 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '3px',
     fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '10px',
-    color: 'rgba(146,155,179,0.35)',
-    letterSpacing: '0.05em',
-    zIndex: 2000,
+    fontSize: '9px',
+    letterSpacing: '0.04em',
+    cursor: 'pointer',
+    padding: '6px 12px',
+  },
+  mobileMenuModal: {
+    position: 'fixed',
+    inset: '0 0 60px 0',
+    background: 'rgba(5, 6, 11, 0.96)',
+    backdropFilter: 'blur(16px)',
+    zIndex: 3400,
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    animation: 'fadeIn 0.25s ease',
+  },
+  mobileMenuHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontSize: '14px',
+    fontWeight: 700,
+    color: '#00F5FF',
+    borderBottom: '1px solid rgba(0, 245, 255, 0.15)',
+    paddingBottom: '12px',
+  },
+  mobileMenuClose: {
+    background: 'transparent',
+    border: 'none',
+    color: '#929BB3',
+    fontSize: '18px',
+    cursor: 'pointer',
+  },
+  mobileMenuList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    overflowY: 'auto',
+  },
+  mobileMenuItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(9, 13, 25, 0.7)',
+    border: '1px solid',
+    borderRadius: '10px',
+    padding: '14px 16px',
+    cursor: 'pointer',
+    textAlign: 'left',
   },
 };

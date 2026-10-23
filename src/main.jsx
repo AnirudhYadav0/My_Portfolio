@@ -5,6 +5,12 @@ import './styles/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    {/* Skip-to-content for keyboard/screen-reader users */}
+    <a href="#main-content" className="skip-to-content">
+      Skip to content
+    </a>
+    <div id="main-content" style={{ height: '100%' }}>
+      <App />
+    </div>
   </React.StrictMode>,
 )

@@ -17,12 +17,15 @@ const COMMANDS = {
       { text: 'projects       — List all projects', color: '#F4F7FF' },
       { text: 'skills         — Show technical skills', color: '#F4F7FF' },
       { text: 'experience     — View experience & certifications', color: '#F4F7FF' },
+      { text: 'resume         — Download & view official resume (PDF)', color: '#71FF9C' },
       { text: 'github         — Open GitHub profile', color: '#F4F7FF' },
+      { text: 'email          — Display developer contact email', color: '#F4F7FF' },
       { text: 'contact        — Open contact portal', color: '#F4F7FF' },
       { text: 'open <world>   — Navigate to a destination', color: '#F4F7FF' },
       { text: 'home           — Return to universe home', color: '#F4F7FF' },
       { text: 'hire           — Why hire Anirudh?', color: '#F4F7FF' },
-      { text: 'clear          — Clear terminal', color: '#F4F7FF' },
+      { text: 'clear / cls    — Clear terminal screen', color: '#F4F7FF' },
+      { text: 'exit / quit    — Close terminal window', color: '#F4F7FF' },
       { text: '' },
       { text: 'Worlds: about · tripnexus · enterskill · skills · experience · contact', color: '#929BB3' },
     ],
@@ -88,6 +91,50 @@ const COMMANDS = {
     };
   },
 
+  linkedin: () => {
+    if (profile.linkedin) {
+      window.open(profile.linkedin, '_blank', 'noopener,noreferrer');
+      return {
+        type: 'output',
+        lines: [
+          { text: `Opening LinkedIn: ${profile.linkedin}`, color: '#71FF9C' },
+          { text: 'Launched in a new tab.', color: '#929BB3' },
+        ],
+      };
+    }
+    return {
+      type: 'output',
+      lines: [
+        { text: 'LinkedIn: Profile pending / configurable in src/data/profile.js', color: '#929BB3' },
+        { text: `Connect directly via GitHub (${profile.github}) or Email (${profile.email}).`, color: '#00F5FF' },
+      ],
+    };
+  },
+
+  resume: () => {
+    window.open(profile.resume || '/resume.pdf', '_blank', 'noopener,noreferrer');
+    return {
+      type: 'output',
+      lines: [
+        { text: 'Initiating resume download / view...', color: '#00F5FF' },
+        { text: 'PDF Document: /resume.pdf', color: '#71FF9C' },
+        { text: 'Opened in a new browser tab.', color: '#929BB3' },
+      ],
+    };
+  },
+
+  cv: () => COMMANDS.resume(),
+
+  email: () => ({
+    type: 'output',
+    lines: [
+      { text: `Primary Email: ${profile.email || 'yadavanirudh1826@gmail.com'}`, color: '#71FF9C' },
+      { text: 'Type "contact" or "open contact" to transmit a message.', color: '#929BB3' },
+    ],
+  }),
+
+  mail: () => COMMANDS.email(),
+
   contact: () => ({
     type: 'navigate',
     dest: 'contact',
@@ -105,6 +152,32 @@ const COMMANDS = {
   }),
 
   clear: () => ({ type: 'clear', lines: [] }),
+  cls: () => ({ type: 'clear', lines: [] }),
+
+  exit: () => ({ type: 'exit', lines: [] }),
+  quit: () => ({ type: 'exit', lines: [] }),
+  q: () => ({ type: 'exit', lines: [] }),
+
+  whoami: () => ({
+    type: 'output',
+    lines: [
+      { text: 'visitor@neonverse (Recruiter / Tech Explorer)', color: '#71FF9C' },
+      { text: 'Host: NEONVERSE Core OS v1.0 [macOS/Linux/Web]', color: '#929BB3' },
+    ],
+  }),
+
+  date: () => ({
+    type: 'output',
+    lines: [{ text: new Date().toUTCString(), color: '#00F5FF' }],
+  }),
+
+  sudo: () => ({
+    type: 'error',
+    lines: [
+      { text: 'Permission denied: User "visitor" is not in the sudoers file.', color: '#FF35D3' },
+      { text: 'This incident will be reported to NEONVERSE security.', color: '#929BB3' },
+    ],
+  }),
 
   hire: () => ({
     type: 'output',
@@ -242,6 +315,11 @@ export default function DeveloperTerminal({ onClose, onNavigate }) {
       return;
     }
 
+    if (result.type === 'exit') {
+      onClose();
+      return;
+    }
+
     const newEntry = {
       input: cmd,
       ...result,
@@ -254,14 +332,14 @@ export default function DeveloperTerminal({ onClose, onNavigate }) {
         onNavigate(result.dest);
       }, 300);
     }
-  }, [onNavigate]);
+  }, [onNavigate, onClose]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
     runCommand(input);
   }, [input, runCommand]);
 
-  const quickCommands = ['help', 'projects', 'open tripnexus', 'open enterskill', 'skills', 'contact', 'clear'];
+  const quickCommands = ['help', 'projects', 'open tripnexus', 'open enterskill', 'skills', 'resume', 'contact', 'clear'];
 
   return (
     <div style={styles.overlay} role="dialog" aria-label="Developer Terminal" aria-modal="true">
